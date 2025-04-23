@@ -1,0 +1,9 @@
+services:
+  postgres:
+    image: postgres:latest
+    restart: always
+    container_name: rubyams_postgres
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    ports:
+      - 5432:5432
