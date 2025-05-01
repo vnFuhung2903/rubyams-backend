@@ -1,25 +1,31 @@
 package config
 
 import (
-	"fmt"
 	"log"
 
-	"github.com/vnFuhung2903/rubyams-backend/env"
-	"github.com/vnFuhung2903/rubyams-backend/model"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
+	"github.com/spf13/viper"
 )
 
-func ConnectPostgresDb(env *env.Env) *gorm.DB {
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable", env.DBHost, env.DBUser, env.DBPass, env.DBName, env.DBPort)
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+type Config struct {
+	DBHost string `mapstructure:"DB_HOST"`
+	DBPort string `mapstructure:"DB_PORT"`
+	DBUser string `mapstructure:"DB_USER"`
+	DBPass string `mapstructure:"DB_PASS"`
+	DBName string `mapstructure:"DB_NAME"`
+}
+
+func NewConfig() *Config {
+	config := Config{}
+	viper.SetConfigFile(".env")
+
+	err := viper.ReadInConfig()
 	if err != nil {
-		log.Fatalf("Postgres connection error: %v", err)
+		log.Fatal("Can't find the file .env : ", err)
 	}
 
-	err = db.AutoMigrate(&model.Student{}, &model.Bid{}, &model.Vote{})
+	err = viper.Unmarshal(&config)
 	if err != nil {
-		log.Fatalf("Migrate error: %v", err)
+		log.Fatal("Environment can't be loaded: ", err)
 	}
-	return db
+	return &config
 }
